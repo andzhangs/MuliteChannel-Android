@@ -1,0 +1,125 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    //    id 'walle'
+}
+
+//apply from: "${rootDir}/channel/reinforce.gradle"
+
+android {
+    signingConfigs {
+        release {
+            storePassword 'zs.so.android'
+            keyAlias 'zs.so.android'
+            keyPassword 'zs.so.android'
+            storeFile file('../so.jks')
+        }
+    }
+
+    namespace 'com.mulitechannel.android'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.mulitechannel.android"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            //混淆
+            minifyEnabled true
+            //Zipalign优化
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    //    applicationVariants.all { variant ->
+//        // 打包完成后复制到的目录
+//        def outputFileDir = "${project.projectDir.absolutePath}/release"
+//        // 打包完成后做的一些事,复制apk到指定文件夹
+//        variant.assembleProvider.get().doLast {
+//            File out = new File(outputFileDir)
+//            copy {
+//                variant.outputs.forEach { file ->
+//                    copy {
+//                        from file.outputFile
+//                        into out
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+//    walle {
+//        // 指定渠道包的输出路径
+//        apkOutputFolder = new File("${rootDir}/channel/release")
+//        // 定制渠道包的APK的文件名称
+//        apkFileNameFormat = 'attrsense-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk';
+//        // 渠道配置文件
+//        channelFile = new File("${rootDir}/channel/channels.txt")
+//    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    //    implementation 'com.meituan.android.walle:library:1.1.6'
+
+}
+
+
+
+task("MakeChannels"){
+    //打包库
+    def WALLE_JAR_PATH="${rootDir}/channel/walle-cli-all.jar"
+    //渠道配置文件
+    def WALLE_CHANNELS_CONFIG_PATH="${rootDir}/channel/channels.txt"
+    //编译库
+    def RELEASE_APK_PATH="${rootDir}/app/release/app-release.apk"
+    ////渠道Apk输出路径
+    def CHANNEL_APKS_PATH="${rootDir}/channel/channels"
+
+    doFirst{
+        exec{
+            ExecSpec execSpec->{
+                executable 'sh'
+                args '-c', "java -jar ${WALLE_JAR_PATH} batch -f ${WALLE_CHANNELS_CONFIG_PATH} ${RELEASE_APK_PATH} ${CHANNEL_APKS_PATH}"
+            }
+        }
+        println("MakeChannels.doFrist is end.")
+    }
+
+    doLast{
+        def APP_NAME="app-release_samsung"
+        def CHECK_CHANNEL_PATH="${rootDir}/channel/channels/${APP_NAME}.apk"
+        exec{
+            ExecSpec execSpec->{
+                executable 'sh'
+                args '-c', "java -jar ${WALLE_JAR_PATH} show ${CHECK_CHANNEL_PATH}"
+            }
+        }
+        println("MakeChannels.doLast is end.")
+    }
+}

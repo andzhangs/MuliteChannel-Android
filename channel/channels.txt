@@ -1,0 +1,31 @@
+#Walle
+
+# 美团
+meituan
+#三星
+samsung
+hiapk
+anzhi
+# 小米
+xiaomi
+91com
+gfan
+appchina
+nduoa
+3gcn
+mumayi
+10086com
+wostore
+189store
+lenovomm
+hicloud
+meizu
+wandou
+# 百度
+baidu
+# 360
+360cn
+# 应用宝
+myapp
+# 双深
+attrsense
